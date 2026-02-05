@@ -742,8 +742,11 @@ to change the property names this sets."
 
 It must receive a coercion to string, as not every time will it
 be populated."
-  (decode-coding-string
-   (cl-coerce data 'string) jiralib-coding-system))
+  ;; (message "thanh %s" (org-jira-parser-jira-to-org data))
+  ;; (org-jira-parser-jira-to-org data))
+
+  (org-jira-parser-jira-to-org (decode-coding-string
+    (cl-coerce data 'string) jiralib-coding-system)))
 
 (defun org-jira-insert (&rest args)
   "Set coding to text provide by `ARGS' when insert in buffer."
@@ -1189,10 +1192,14 @@ ORG-JIRA-PROJ-KEY-OVERRIDE being set before and after running."
                                                      (org-jira-insert entry-heading "\n"))
 
                                                    ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
+                                                   (message "thanh issue %s" (slot-value Issue heading-entry))
                                                    (org-jira-insert
-                                                    (replace-regexp-in-string
-                                                     "^" "  "
-                                                     (format "%s" (slot-value Issue heading-entry)))))))
+                                                    ;; (replace-regexp-in-string
+                                                    ;;  "^" "  "
+                                                    ;;  (format "%s" (slot-value Issue heading-entry)))
+                                                    (org-jira-parser-jira-to-org (slot-value Issue heading-entry))
+
+                                                    ))))
              '(description))
 
             (when org-jira-download-comments
@@ -1547,7 +1554,7 @@ skipped (counted separately; listed in dry-run buffer)."
           (org-jira-entry-put (point) "updated" updated))
         (goto-char (point-max))
         ;;  Insert 2 spaces of indentation so Jira markup won't cause org-markup
-        (org-jira-insert (replace-regexp-in-string "^" "  " (or body "")))))))
+        (org-jira-insert (org-jira-parser-jira-to-org (or body "")))))))
 
 (defun org-jira-update-comments-for-issue (Issue)
   "Update the comments for the specified ISSUE issue."
